@@ -104,6 +104,32 @@
     @apply border-border;
   }
   body {
-    @apply font-sans antialiased bg-[#f5f5f7] text-foreground flex items-center justify-center min-h-screen overflow-x-hidden;
+    @apply font-sans antialiased bg-[#f5f5f7] text-foreground min-h-screen overflow-x-hidden;
+  }
+  /* Safe area for notched devices (Ionic/Capacitor) */
+  ion-content {
+    --padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Page transition: ensure full-viewport stacking for Ionic animations */
+  ion-router-outlet {
+    display: block;
+    contain: layout style;
+  }
+  ion-router-outlet .ion-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: block;
+    contain: layout style paint;
+    z-index: 0;
+  }
+  ion-router-outlet .ion-page.ion-page-invisible {
+    pointer-events: none;
   }
 }

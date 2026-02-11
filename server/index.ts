@@ -100,10 +100,9 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
+  // Single port: Express listens here and serves both API and client.
+  // In dev, Vite runs in middleware mode (see server/vite.ts) — it does not
+  // open a second port; the client is served at the same URL as the API.
   const port = parseInt(process.env.PORT || "5014", 10);
   httpServer.listen(
     {

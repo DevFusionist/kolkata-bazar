@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link, useHistory } from "react-router-dom";
+import { IonButton, IonInput, IonItem, IonLabel } from "@ionic/react";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { setStoredStore, getSession, loginWithMpin } from "@/lib/api";
@@ -14,9 +10,11 @@ function normalizeMobile(v: string): string {
   return digits.startsWith("91") ? digits : `91${digits}`;
 }
 
+const totalSteps = 2;
+
 export default function Login() {
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const history = useHistory();
   const [step, setStep] = useState<"phone" | "mpin">("phone");
   const [phone, setPhone] = useState("");
   const [mpin, setMpin] = useState("");
@@ -28,12 +26,12 @@ export default function Login() {
       .then((data) => {
         if (data.store?.id && data.ownerToken) {
           setStoredStore(data.store.id, data.ownerToken);
-          setLocation("/dashboard");
+          history.push("/dashboard");
         }
       })
       .catch(() => {})
       .finally(() => setCheckingSession(false));
-  }, [setLocation]);
+  }, [history]);
 
   const handleSubmitPhone = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +51,7 @@ export default function Login() {
       if (data.store?.id && data.ownerToken) {
         setStoredStore(data.store.id, data.ownerToken);
         toast({ title: "Logged in", description: `Welcome back, ${data.store.name}` });
-        setLocation("/dashboard");
+        history.push("/dashboard");
       }
     } catch (err) {
       toast({
@@ -66,126 +64,119 @@ export default function Login() {
     }
   };
 
+  const currentStep = step === "phone" ? 1 : 2;
+
   if (checkingSession) {
     return (
-      <Layout showSellerNav>
-        <div className="w-full max-w-md mx-auto px-4 py-10 flex justify-center items-center min-h-[200px]">
-          <p className="text-muted-foreground">Checking…</p>
-        </div>
-      </Layout>
+      <div className="min-h-screen bg-background p-6 flex flex-col items-center justify-center max-w-md mx-auto">
+        <p className="text-muted-foreground">Checking…</p>
+      </div>
     );
   }
 
   return (
-    <Layout showSellerNav>
-      <div className="w-full max-w-md mx-auto px-4 py-10">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
-            <CardHeader className="text-center">
-              <CardTitle className="text-xl font-serif text-secondary">Log in</CardTitle>
-              <CardDescription>
-                {step === "phone"
-                  ? "Enter your WhatsApp number linked to your shop."
-                  : "Enter your 6-digit MPIN to access your shop."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AnimatePresence mode="wait">
-                {step === "phone" ? (
-                  <motion.form
-                    key="phone"
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 8 }}
-                    onSubmit={handleSubmitPhone}
-                    className="space-y-4"
-                  >
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">WhatsApp number</Label>
-                      <div className="flex">
-                        <span className="flex items-center justify-center px-3 border border-r-0 rounded-l-md bg-muted text-muted-foreground text-sm">
-                          +91
-                        </span>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder="9876543210"
-                          value={phone}
-                          onChange={(e) =>
-                            setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
-                          }
-                          className="rounded-l-none"
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-secondary hover:bg-secondary/90"
-                      disabled={phone.replace(/\D/g, "").length < 10}
-                    >
-                      Next
-                    </Button>
-                  </motion.form>
-                ) : (
-                  <motion.form
-                    key="mpin"
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 8 }}
-                    onSubmit={handleLoginWithMpin}
-                    className="space-y-4"
-                  >
-                    <p className="text-sm text-muted-foreground">
-                      Logging in as +91 {phone.replace(/\D/g, "").slice(-10)}
-                    </p>
-                    <div className="space-y-2">
-                      <Label htmlFor="mpin">MPIN (6 digits)</Label>
-                      <Input
-                        id="mpin"
-                        type="password"
-                        inputMode="numeric"
-                        placeholder="••••••"
-                        value={mpin}
-                        onChange={(e) =>
-                          setMpin(e.target.value.replace(/\D/g, "").slice(0, 6))
-                        }
-                        className="text-center text-lg tracking-[0.5em]"
-                        maxLength={6}
-                      />
-                    </div>
-                    <Button
-                      type="submit"
-                      className="w-full bg-secondary hover:bg-secondary/90"
-                      disabled={loading || mpin.length !== 6}
-                    >
-                      {loading ? "Logging in…" : "Log in"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full"
-                      onClick={() => setStep("phone")}
-                      disabled={loading}
-                    >
-                      Change number
-                    </Button>
-                  </motion.form>
-                )}
-              </AnimatePresence>
-              <p className="text-xs text-center text-muted-foreground mt-4">
-                New here?{" "}
-                <Link href="/onboarding" className="text-primary font-medium hover:underline">
-                  Set up your shop
-                </Link>
+    <div className="min-h-screen bg-background p-6 flex flex-col items-center justify-center max-w-md mx-auto">
+      <div className="w-full space-y-6">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-bold font-serif text-secondary">Log in</h1>
+          <p className="text-muted-foreground">Step {currentStep} of {totalSteps}</p>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {step === "phone" ? (
+            <motion.form
+              key="phone"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              onSubmit={handleSubmitPhone}
+              className="space-y-4"
+            >
+              <IonItem lines="none" className="ion-margin-bottom">
+                <IonLabel position="stacked">WhatsApp number</IonLabel>
+                <div className="flex w-full">
+                  <span className="flex items-center justify-center px-3 border border-r-0 rounded-l-md bg-muted text-muted-foreground text-sm">
+                    +91
+                  </span>
+                  <IonInput
+                    type="tel"
+                    placeholder="9876543210"
+                    value={phone}
+                    onIonInput={(e) =>
+                      setPhone((e.detail.value ?? "").replace(/\D/g, "").slice(0, 10))
+                    }
+                    className="rounded-r-md flex-1"
+                  />
+                </div>
+              </IonItem>
+              <p className="text-xs text-muted-foreground ion-margin-bottom">
+                Enter the number linked to your shop.
               </p>
-            </CardContent>
-          </Card>
-        </motion.div>
+              <IonButton
+                type="submit"
+                expand="block"
+                size="large"
+                color="secondary"
+                disabled={phone.replace(/\D/g, "").length < 10}
+              >
+                Next
+              </IonButton>
+            </motion.form>
+          ) : (
+            <motion.form
+              key="mpin"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              onSubmit={handleLoginWithMpin}
+              className="space-y-4"
+            >
+              <p className="text-sm text-muted-foreground ion-margin-bottom">
+                Logging in as +91 {phone.replace(/\D/g, "").slice(-10)}
+              </p>
+              <IonItem lines="none" className="ion-margin-bottom">
+                <IonLabel position="stacked">MPIN (6 digits)</IonLabel>
+                <IonInput
+                  type="password"
+                  inputMode="numeric"
+                  placeholder="••••••"
+                  value={mpin}
+                  onIonInput={(e) =>
+                    setMpin((e.detail.value ?? "").replace(/\D/g, "").slice(0, 6))
+                  }
+                  maxlength={6}
+                  className="text-center text-lg tracking-[0.5em]"
+                />
+              </IonItem>
+              <IonButton
+                type="submit"
+                expand="block"
+                size="large"
+                color="secondary"
+                disabled={loading || mpin.length !== 6}
+              >
+                {loading ? "Logging in…" : "Log in"}
+              </IonButton>
+              <IonButton
+                type="button"
+                fill="clear"
+                expand="block"
+                onClick={() => setStep("phone")}
+                disabled={loading}
+              >
+                Change number
+              </IonButton>
+            </motion.form>
+          )}
+        </AnimatePresence>
+
+        <p className="text-xs text-center text-muted-foreground">
+          New here?{" "}
+          <Link to="/onboarding" className="text-primary font-medium hover:underline">
+            Set up your shop
+          </Link>
+        </p>
       </div>
-    </Layout>
+    </div>
   );
 }

@@ -145,6 +145,14 @@ export async function registerRoutes(
           });
           return;
         }
+        const normalizedWhatsapp = normalizeWhatsapp(req.body.mobile);
+        const existingStore = await storage.getStoreByWhatsapp(normalizedWhatsapp);
+        if (existingStore) {
+          res.status(409).json({
+            message: "This number is already linked to another shop. Use Log in to access your shop.",
+          });
+          return;
+        }
         const mobile = normalizeMobile(req.body.mobile);
         const result = await sendOtp(mobile);
         if (!result.success) {

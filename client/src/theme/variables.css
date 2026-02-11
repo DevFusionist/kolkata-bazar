@@ -1,0 +1,117 @@
+/* Ionic theme – same as index.css (Kolkata Taxi Yellow & Alta Red) */
+/* See https://ionicframework.com/docs/theming */
+
+:root {
+  /* Kolkata Taxi Yellow & Alta Red Palette */
+  --background: 40 30% 98%; /* Warm off-white */
+  --foreground: 20 10% 15%; /* Dark warm gray */
+
+  --card: 0 0% 100%;
+  --card-foreground: 20 10% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 10% 15%;
+
+  --primary: 45 100% 50%; /* Taxi Yellow */
+  --primary-foreground: 20 10% 10%; /* Dark contrast for yellow */
+
+  --secondary: 0 70% 45%; /* Alta Red/Clay */
+  --secondary-foreground: 0 0% 100%; /* White for red */
+
+  --muted: 40 20% 90%;
+  --muted-foreground: 20 10% 40%;
+
+  --accent: 45 80% 90%; /* Light yellow wash */
+  --accent-foreground: 20 10% 15%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 40 20% 85%;
+  --input: 40 20% 85%;
+  --ring: 45 100% 50%;
+
+  --radius: 0.75rem;
+
+  --chart-1: 45 100% 50%;
+  --chart-2: 0 70% 45%;
+  --chart-3: 199 80% 50%;
+  --chart-4: 150 60% 45%;
+  --chart-5: 280 50% 50%;
+
+  /* Ionic components – Kolkata palette (taxi yellow, alta red) */
+  --ion-color-primary: #e6b800;
+  --ion-color-primary-rgb: 230, 184, 0;
+  --ion-color-primary-contrast: #1a1a1a;
+  --ion-color-primary-contrast-rgb: 26, 26, 26;
+  --ion-color-primary-shade: #caa200;
+  --ion-color-primary-tint: #e9bf1a;
+
+  --ion-color-secondary: #b33b2e;
+  --ion-color-secondary-rgb: 179, 59, 46;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+
+  /* Force light theme to match original web app */
+  --ion-background-color: hsl(40, 30%, 98%);
+  --ion-text-color: hsl(20, 10%, 15%);
+  --ion-toolbar-background: rgba(255, 255, 255, 0.95);
+  --ion-toolbar-color: hsl(0, 70%, 45%);
+  --ion-tab-bar-background: rgba(255, 255, 255, 0.95);
+  --ion-tab-bar-color: hsl(20, 10%, 40%);
+  --ion-tab-bar-color-activated: #e6b800;
+  --ion-card-background: #ffffff;
+  --ion-border-color: hsl(40, 20%, 85%);
+}
+
+/* Force header, content and tab bar to light theme (match original app) */
+ion-header ion-toolbar {
+  --background: rgba(255, 255, 255, 0.95);
+  --color: hsl(0, 70%, 45%);
+  --border-color: hsl(40, 20%, 85%);
+}
+
+ion-content {
+  --background: hsl(40, 30%, 98%);
+}
+
+/* Let content inside ion-content take space (Ionic 7+ shadow DOM) */
+ion-content::part(scroll) {
+  display: flex;
+  flex-direction: column;
+}
+
+ion-tab-bar {
+  --background: rgba(255, 255, 255, 0.95);
+  --border-color: hsl(40, 20%, 85%);
+}
+
+.dark {
+  --background: 20 10% 10%;
+  --foreground: 40 30% 98%;
+
+  --card: 20 10% 15%;
+  --card-foreground: 40 30% 98%;
+
+  --popover: 20 10% 15%;
+  --popover-foreground: 40 30% 98%;
+
+  --primary: 45 100% 50%;
+  --primary-foreground: 20 10% 10%;
+
+  --secondary: 0 70% 55%;
+  --secondary-foreground: 0 0% 100%;
+
+  --muted: 20 10% 20%;
+  --muted-foreground: 40 20% 70%;
+
+  --accent: 20 10% 20%;
+  --accent-foreground: 40 30% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 20 10% 25%;
+  --input: 20 10% 25%;
+  --ring: 45 100% 50%;
+}

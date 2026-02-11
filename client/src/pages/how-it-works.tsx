@@ -1,7 +1,5 @@
-import { Link } from "wouter";
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { IonButton, IonCard, IonCardContent } from "@ionic/react";
 import { motion } from "framer-motion";
 import { MessageCircle, Store, Smartphone, Zap, Shield } from "lucide-react";
 
@@ -34,8 +32,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <Layout>
-      <div className="w-full max-w-2xl mx-auto px-4 py-8 sm:py-12">
+    <div className="w-full max-w-2xl mx-auto px-4 py-8 sm:py-12">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -50,7 +47,7 @@ export default function HowItWorks() {
           </p>
         </motion.div>
 
-        <div className="space-y-6">
+        <div className="ion-padding-vertical ion-margin-vertical space-y-6">
           {steps.map(({ step, title, desc, icon: Icon }, i) => (
             <motion.div
               key={step}
@@ -58,9 +55,9 @@ export default function HowItWorks() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1, duration: 0.3 }}
             >
-              <Card className="overflow-hidden border bg-card hover:shadow-md transition-shadow">
-                <CardContent className="p-5 flex gap-4 items-start">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center">
+              <IonCard className="overflow-hidden">
+                <IonCardContent className="p-5 flex gap-4 items-start">
+                  <div className="shrink-0 w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
@@ -70,8 +67,8 @@ export default function HowItWorks() {
                     <h2 className="text-lg font-semibold text-foreground mt-0.5">{title}</h2>
                     <p className="text-muted-foreground text-sm mt-1">{desc}</p>
                   </div>
-                </CardContent>
-              </Card>
+                </IonCardContent>
+              </IonCard>
             </motion.div>
           ))}
         </div>
@@ -79,23 +76,22 @@ export default function HowItWorks() {
         <div className="mt-10 p-6 rounded-xl bg-muted/50 border text-center">
           <Shield className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground">
-            We don’t store your payments or take a cut. You get orders on your WhatsApp; you handle delivery and payment the way you always do.
+            We don't store your payments or take a cut. You get orders on your WhatsApp; you handle delivery and payment the way you always do.
           </p>
         </div>
 
-        <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/onboarding">
-            <Button size="lg" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90">
+        <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center items-center">
+          <Link to="/onboarding">
+            <IonButton size="large" shape="round">
               Start your shop
-            </Button>
+            </IonButton>
           </Link>
-          <Link href="/">
-            <Button variant="outline" size="lg" className="w-full sm:w-auto">
+          <Link to="/">
+            <IonButton fill="outline" size="large" shape="round">
               Back to home
-            </Button>
+            </IonButton>
           </Link>
         </div>
       </div>
-    </Layout>
   );
 }

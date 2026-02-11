@@ -18,14 +18,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { PageConfig, StoreSection } from "@shared/schema";
 import { SECTION_TYPES } from "@shared/schema";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { IonButton, IonCard, IonCardContent, IonActionSheet } from "@ionic/react";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { SectionPropsEditor } from "./SectionPropsEditor";
 
@@ -66,28 +59,46 @@ function SortableSectionRow({
   };
 
   return (
-    <Card
+    <IonCard
       ref={setNodeRef}
       style={style}
-      className={`p-3 flex items-center gap-2 ${isDragging ? "opacity-80 shadow-lg" : ""}`}
+      className={`overflow-hidden border-l-4 border-l-primary/30 ${isDragging ? "opacity-90 shadow-xl scale-[1.02]" : ""}`}
     >
-      <button
-        type="button"
-        className="touch-none cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-        {...attributes}
-        {...listeners}
-        aria-label="Drag to reorder"
-      >
-        <GripVertical className="w-5 h-5" />
-      </button>
-      <span className="flex-1 font-medium text-sm">{SECTION_LABELS[section.type] ?? section.type}</span>
-      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}>
-        <Pencil className="w-4 h-4" />
-      </Button>
-      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={onRemove}>
-        <Trash2 className="w-4 h-4" />
-      </Button>
-    </Card>
+      <IonCardContent className="p-0">
+        <div className="flex items-center gap-4 px-4 py-3.5">
+          <button
+            type="button"
+            className="touch-none cursor-grab active:cursor-grabbing rounded p-1.5 -ml-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            {...attributes}
+            {...listeners}
+            aria-label="Drag to reorder"
+          >
+            <GripVertical className="w-5 h-5" />
+          </button>
+          <span className="flex-1 font-semibold text-base text-foreground min-w-0 truncate">
+            {SECTION_LABELS[section.type] ?? section.type}
+          </span>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={onEdit}
+              className="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/30 transition-colors"
+              aria-label="Edit section"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onRemove}
+              className="flex items-center justify-center w-9 h-9 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 active:bg-destructive/30 transition-colors"
+              aria-label="Remove section"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </IonCardContent>
+    </IonCard>
   );
 }
 
@@ -102,6 +113,7 @@ type Props = {
 
 export function SectionEditor({ pageConfig, onChange, onBack, onNext, nextLabel = "Continue", nextDisabled = false }: Props) {
   const [editingSection, setEditingSection] = useState<StoreSection | null>(null);
+  const [addSheetOpen, setAddSheetOpen] = useState(false);
   const sections = pageConfig.sections ?? [];
 
   const sensors = useSensors(
@@ -120,6 +132,7 @@ export function SectionEditor({ pageConfig, onChange, onBack, onNext, nextLabel 
   };
 
   const addSection = (type: (typeof SECTION_TYPES)[number]) => {
+    setAddSheetOpen(false);
     const newSection: StoreSection = {
       id: genId(),
       type,
@@ -162,30 +175,32 @@ export function SectionEditor({ pageConfig, onChange, onBack, onNext, nextLabel 
         </SortableContext>
       </DndContext>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full">
-            <Plus className="w-4 h-4 mr-2" /> Add section
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          {SECTION_TYPES.map((type) => (
-            <DropdownMenuItem key={type} onClick={() => addSection(type)}>
-              {SECTION_LABELS[type] ?? type}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <IonButton fill="outline" expand="block" onClick={() => setAddSheetOpen(true)}>
+        <Plus className="w-4 h-4 mr-2" /> Add section
+      </IonButton>
+
+      <IonActionSheet
+        isOpen={addSheetOpen}
+        onDidDismiss={() => setAddSheetOpen(false)}
+        header="Add section"
+        buttons={[
+          ...SECTION_TYPES.map((type) => ({
+            text: SECTION_LABELS[type] ?? type,
+            handler: () => addSection(type),
+          })),
+          { text: "Cancel", role: "cancel" },
+        ]}
+      />
 
       <div className="flex gap-3 pt-4">
         {onBack && (
-          <Button variant="outline" onClick={onBack} className="flex-1">
+          <IonButton fill="outline" onClick={onBack} className="flex-1">
             Back
-          </Button>
+          </IonButton>
         )}
-        <Button onClick={onNext} className={onBack ? "flex-1" : "w-full"} disabled={nextDisabled}>
+        <IonButton onClick={onNext} className={onBack ? "flex-1" : "w-full"} disabled={nextDisabled}>
           {nextLabel}
-        </Button>
+        </IonButton>
       </div>
 
       {editingSection && (

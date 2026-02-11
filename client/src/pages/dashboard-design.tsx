@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useHistory } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getStoredStoreId, getStoredOwnerToken, api, type PageConfig } from "@/lib/api";
-import { Layout } from "@/components/Layout";
 import { SectionEditor } from "@/components/store-builder/SectionEditor";
 import { useToast } from "@/hooks/use-toast";
 import { defaultPageConfig, type PageConfig as SchemaPageConfig } from "@shared/schema";
 
 export default function DashboardDesign() {
-  const [, setLocation] = useLocation();
+  const history = useHistory();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const storeId = getStoredStoreId();
@@ -36,31 +35,35 @@ export default function DashboardDesign() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stores", storeId!] });
       toast({ title: "Store design saved", description: "Your store page has been updated." });
-      setLocation("/dashboard");
+      history.push("/dashboard");
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     },
   });
 
-  if (!storeId) {
-    setLocation("/dashboard");
-    return null;
-  }
+  const handleSave = () => {
+    if (!storeId || !ownerToken) {
+      toast({
+        title: "Sign in to save",
+        description: "Complete signup to save your store design.",
+        variant: "destructive",
+      });
+      return;
+    }
+    updateStoreMutation.mutate(pageConfig);
+  };
 
-  if (isLoading && !store) {
+  if (storeId && isLoading && !store) {
     return (
-      <Layout showSellerNav>
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <p className="text-muted-foreground">Loading…</p>
-        </div>
-      </Layout>
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <p className="text-muted-foreground">Loading…</p>
+      </div>
     );
   }
 
   return (
-    <Layout showSellerNav>
-      <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20">
         <header className="bg-secondary text-white p-6 shadow-md">
           <div className="max-w-md mx-auto">
             <h1 className="font-bold text-xl">Customize store</h1>
@@ -73,13 +76,12 @@ export default function DashboardDesign() {
           <SectionEditor
             pageConfig={pageConfig}
             onChange={setPageConfig}
-            onBack={() => setLocation("/dashboard")}
-            onNext={() => updateStoreMutation.mutate(pageConfig)}
+            onBack={() => history.push("/dashboard")}
+            onNext={handleSave}
             nextLabel={updateStoreMutation.isPending ? "Saving…" : "Save design"}
             nextDisabled={updateStoreMutation.isPending}
           />
         </main>
       </div>
-    </Layout>
   );
 }

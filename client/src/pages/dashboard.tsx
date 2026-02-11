@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useHistory } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
 import {
@@ -9,30 +9,30 @@ import {
   type StoreWithProducts,
   type Product as ApiProduct,
 } from "@/lib/api";
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+} from "@ionic/react";
 import { Plus, Share2, ExternalLink, Trash2, IndianRupee, Palette, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
 
 export default function Dashboard() {
   const storeId = getStoredStoreId();
   const ownerToken = getStoredOwnerToken();
-  const [, setLocation] = useLocation();
+  const history = useHistory();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [newProduct, setNewProduct] = useState({ name: "", price: "", image: "" });
+  const [addProductOpen, setAddProductOpen] = useState(false);
 
   const { data: apiStore, isLoading } = useQuery({
     queryKey: ["stores", storeId ?? ""],
@@ -46,6 +46,8 @@ export default function Dashboard() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["stores", storeId!] });
       toast({ title: "Product Added", description: `${variables.name} is now live!` });
+      setAddProductOpen(false);
+      setNewProduct({ name: "", price: "", image: "" });
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });
@@ -87,7 +89,6 @@ export default function Dashboard() {
         image: newProduct.image || undefined,
         description: "Quality product from our store.",
       });
-      setNewProduct({ name: "", price: "", image: "" });
       return;
     }
 
@@ -100,6 +101,7 @@ export default function Dashboard() {
       description: "Quality product from our store.",
     });
     setNewProduct({ name: "", price: "", image: "" });
+    setAddProductOpen(false);
     toast({ title: "Product Added", description: `${newProduct.name} is now live!` });
   };
 
@@ -120,41 +122,31 @@ export default function Dashboard() {
 
   if (!storeId && !fallbackStore.name) {
     return (
-      <Layout showSellerNav>
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="text-center">
-            <p className="text-muted-foreground mb-4">Set up your shop first.</p>
-            <Button onClick={() => setLocation("/onboarding")}>Create your shop</Button>
-          </div>
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Set up your shop first.</p>
+          <IonButton onClick={() => history.push("/onboarding")}>Create your shop</IonButton>
         </div>
-      </Layout>
+      </div>
     );
   }
 
   if (storeId && isLoading && !apiStore) {
     return (
-      <Layout showSellerNav>
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <p className="text-muted-foreground">Loading…</p>
-        </div>
-      </Layout>
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <p className="text-muted-foreground">Loading…</p>
+      </div>
     );
   }
 
   return (
-    <Layout showSellerNav>
-      <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20">
         <header className="bg-secondary text-white p-4 sm:p-6 shadow-md">
           <div className="flex items-center gap-3 w-full">
-            <Link href="/">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="shrink-0 text-white hover:bg-white/20 rounded-full h-9 w-9"
-                aria-label="Back to home"
-              >
+            <Link to="/">
+              <IonButton fill="clear" className="shrink-0 text-white" aria-label="Back to home">
                 <ArrowLeft className="w-5 h-5" />
-              </Button>
+              </IonButton>
             </Link>
             <div className="flex-1 min-w-0">
               <h1 className="font-bold text-xl truncate">{displayStore.name}</h1>
@@ -163,168 +155,171 @@ export default function Dashboard() {
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse ml-1"></span>
               </p>
             </div>
-            <Link href={`/store/${displayStore.whatsapp}`} className="shrink-0">
-              <Button
-                size="icon"
-                variant="secondary"
-                className="bg-white/20 hover:bg-white/30 rounded-full"
-              >
+            <Link to={`/store/${displayStore.whatsapp}`} className="shrink-0">
+              <IonButton fill="outline" className="bg-white/20 text-white">
                 <ExternalLink className="w-5 h-5" />
-              </Button>
+              </IonButton>
             </Link>
           </div>
         </header>
 
         <main className="w-full p-4 sm:p-6 space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            <Link href="/dashboard/design">
-              <Button className="h-auto py-4 w-full flex flex-col gap-2 bg-white text-foreground border shadow-sm hover:bg-gray-50">
-                <Palette className="w-6 h-6 text-purple-600" />
-                <span className="text-xs font-medium">Customize store</span>
-              </Button>
-            </Link>
-            <Button
-              className="h-auto py-4 flex flex-col gap-2 bg-white text-foreground border shadow-sm hover:bg-gray-50"
+            <IonButton
+              expand="block"
+              fill="outline"
+              className="h-auto py-4"
+              onClick={() => history.push("/dashboard/design")}
+            >
+              <div className="flex items-center justify-center gap-3 w-full">
+                <Palette className="w-5 h-5 text-purple-600 shrink-0" />
+                <span className="text-sm font-medium">Customize store</span>
+              </div>
+            </IonButton>
+            <IonButton
+              expand="block"
+              fill="outline"
+              className="h-auto py-4"
               onClick={copyStoreLink}
             >
-              <Share2 className="w-6 h-6 text-blue-600" />
-              <span className="text-xs font-medium">Share Store</span>
-            </Button>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="h-auto py-4 flex flex-col gap-2 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
-                  <Plus className="w-6 h-6" />
-                  <span className="text-xs font-medium">Add Product</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Add New Product</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Product Name</Label>
-                    <Input
-                      placeholder="e.g. Silk Saree"
-                      value={newProduct.name}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Price (₹)</Label>
-                    <Input
-                      type="number"
-                      placeholder="e.g. 1500"
-                      value={newProduct.price}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, price: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Image URL (Optional)</Label>
-                    <Input
-                      placeholder="https://..."
-                      value={newProduct.image}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, image: e.target.value })
-                      }
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Tip: You can use WhatsApp image links later.
-                    </p>
-                  </div>
+              <div className="flex items-center justify-center gap-3 w-full">
+                <Share2 className="w-5 h-5 text-blue-600 shrink-0" />
+                <span className="text-sm font-medium">Share Store</span>
+              </div>
+            </IonButton>
+            <div className="col-span-2">
+              <IonButton expand="block" className="h-auto py-4" onClick={() => setAddProductOpen(true)}>
+                <div className="flex items-center justify-center gap-3 w-full">
+                  <Plus className="w-5 h-5 shrink-0" />
+                  <span className="text-sm font-medium">Add Product</span>
                 </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button
-                      onClick={handleAddProduct}
-                      type="submit"
-                      className="w-full"
-                      disabled={
-                        !newProduct.name ||
-                        !newProduct.price ||
-                        addProductMutation.isPending
-                      }
-                    >
-                      Add Product
-                    </Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+              </IonButton>
+            </div>
           </div>
 
-          <Card className="bg-gradient-to-br from-gray-900 to-gray-800 text-white border-none">
-            <CardContent className="p-4 flex justify-between items-center">
-              <div>
-                <p className="text-gray-400 text-xs uppercase tracking-wider">
-                  Total Products
+          <IonModal isOpen={addProductOpen} onDidDismiss={() => setAddProductOpen(false)}>
+            <IonHeader>
+              <IonToolbar className="ion-padding-start ion-padding-end">
+                <IonTitle>Add New Product</IonTitle>
+                <IonButton slot="end" fill="clear" onClick={() => setAddProductOpen(false)}>
+                  Close
+                </IonButton>
+              </IonToolbar>
+            </IonHeader>
+            <IonContent className="ion-padding">
+              <div className="space-y-4 py-4 px-4">
+                <IonItem lines="none">
+                  <IonLabel position="stacked">Product Name</IonLabel>
+                  <IonInput
+                    placeholder="e.g. Silk Saree"
+                    value={newProduct.name}
+                    onIonInput={(e) => setNewProduct({ ...newProduct, name: e.detail.value ?? "" })}
+                  />
+                </IonItem>
+                <IonItem lines="none">
+                  <IonLabel position="stacked">Price (₹)</IonLabel>
+                  <IonInput
+                    type="number"
+                    placeholder="e.g. 1500"
+                    value={newProduct.price}
+                    onIonInput={(e) => setNewProduct({ ...newProduct, price: e.detail.value ?? "" })}
+                  />
+                </IonItem>
+                <IonItem lines="none">
+                  <IonLabel position="stacked">Image URL (Optional)</IonLabel>
+                  <IonInput
+                    placeholder="https://..."
+                    value={newProduct.image}
+                    onIonInput={(e) => setNewProduct({ ...newProduct, image: e.detail.value ?? "" })}
+                  />
+                </IonItem>
+                <p className="text-xs text-muted-foreground ion-padding-start">
+                  Tip: You can use WhatsApp image links later.
                 </p>
+              </div>
+              <div className="px-4 pb-4">
+                <IonButton
+                  expand="block"
+                  onClick={handleAddProduct}
+                  disabled={
+                    !newProduct.name ||
+                    !newProduct.price ||
+                    addProductMutation.isPending
+                  }
+                >
+                  Add Product
+                </IonButton>
+              </div>
+            </IonContent>
+          </IonModal>
+
+          <IonCard className="bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+            <IonCardContent className="p-4 flex justify-between items-center">
+              <div>
+                <p className="text-gray-400 text-xs uppercase tracking-wider">Total Products</p>
                 <h3 className="text-2xl font-bold">{products.length}</h3>
               </div>
               <div>
-                <p className="text-gray-400 text-xs uppercase tracking-wider">
-                  Store Views
-                </p>
+                <p className="text-gray-400 text-xs uppercase tracking-wider">Store Views</p>
                 <h3 className="text-2xl font-bold">—</h3>
               </div>
-            </CardContent>
-          </Card>
+            </IonCardContent>
+          </IonCard>
 
           <div>
             <h2 className="font-semibold text-lg mb-4">Your Inventory</h2>
             {products.length === 0 ? (
-              <div className="text-center py-10 border-2 border-dashed rounded-xl text-muted-foreground">
-                <p>No products yet.</p>
-                <p className="text-sm">Add your first item to start selling!</p>
+              <div className="text-center py-12 border-2 border-dashed rounded-2xl text-muted-foreground bg-muted/20">
+                <p className="font-medium">No products yet.</p>
+                <p className="text-sm mt-1">Add your first item to start selling!</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="bg-card p-3 rounded-lg border shadow-sm flex gap-3"
+                    className="bg-card rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                   >
-                    <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden shrink-0">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-medium line-clamp-1">{product.name}</h3>
-                        <p className="text-primary font-bold flex items-center text-sm">
-                          <IndianRupee className="w-3 h-3" /> {product.price}
-                        </p>
+                    <div className="flex gap-4 p-4">
+                      <div className="w-24 h-24 rounded-xl overflow-hidden bg-muted shrink-0 ring-1 ring-border/50">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          className="h-7 text-xs"
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              `${window.location.origin}/store/${displayStore.whatsapp}?product=${product.id}`
-                            );
-                            toast({ title: "Product Link Copied!" });
-                          }}
-                        >
-                          <Share2 className="w-3 h-3 mr-1" /> Link
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                          onClick={() => removeProduct(product.id)}
-                          disabled={deleteProductMutation.isPending}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                      <div className="flex-1 min-w-0 flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-semibold text-base line-clamp-2 text-foreground">
+                            {product.name}
+                          </h3>
+                          <p className="text-primary font-bold text-lg mt-1 flex items-center gap-0.5">
+                            <IndianRupee className="w-4 h-4" /> {product.price}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 mt-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                `${window.location.origin}/store/${displayStore.whatsapp}?product=${product.id}`
+                              );
+                              toast({ title: "Product Link Copied!" });
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 active:bg-primary/35 text-sm font-medium transition-colors"
+                          >
+                            <Share2 className="w-3.5 h-3.5" /> Link
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeProduct(product.id)}
+                            disabled={deleteProductMutation.isPending}
+                            className="flex items-center justify-center w-8 h-8 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 active:bg-destructive/30 disabled:opacity-50 transition-colors"
+                            aria-label="Remove product"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -334,6 +329,5 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
-    </Layout>
   );
 }

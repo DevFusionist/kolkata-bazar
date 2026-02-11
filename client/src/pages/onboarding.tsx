@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { Link, useHistory } from "react-router-dom";
 import { useStore, BusinessType } from "@/lib/store";
-import { Layout } from "@/components/Layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { IonButton, IonInput, IonCard, IonCardContent, IonItem, IonLabel } from "@ionic/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Store, Utensils, Scissors, Laptop, Hammer, Package } from "lucide-react";
 import { api, setStoredStore, getStoredStoreId, sendOtp, verifyOnboardingOtp } from "@/lib/api";
@@ -20,7 +16,7 @@ function normalizeWhatsapp(v: string): string {
 }
 
 export default function Onboarding() {
-  const [, setLocation] = useLocation();
+  const history = useHistory();
   const { store, updateStore } = useStore();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
@@ -32,8 +28,8 @@ export default function Onboarding() {
     type: store.type || "saree",
     mpin: "",
   });
-  // Step 4: store design (template + editor or from scratch)
   const [designView, setDesignView] = useState<"picker" | "editor">("picker");
+  const [numberTakenError, setNumberTakenError] = useState<string | null>(null);
   const [designState, setDesignState] = useState<{ templateId: string | null; pageConfig: PageConfig }>({
     templateId: null,
     pageConfig: { sections: [] },
@@ -41,9 +37,9 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (getStoredStoreId()) {
-      setLocation("/dashboard");
+      history.push("/dashboard");
     }
-  }, [setLocation]);
+  }, [history]);
 
   const businessTypes: { id: BusinessType; label: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
     { id: "saree", label: "Boutique / Saree", icon: Store, color: "bg-pink-100 text-pink-600" },
@@ -57,6 +53,7 @@ export default function Onboarding() {
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || formData.whatsapp.replace(/\D/g, "").length < 10) return;
+    setNumberTakenError(null);
     setLoading(true);
     try {
       await sendOtp(normalizeWhatsapp(formData.whatsapp));
@@ -64,11 +61,17 @@ export default function Onboarding() {
       setOtp("");
       toast({ title: "OTP sent", description: "Check your SMS for the code." });
     } catch (err) {
-      toast({
-        title: "Could not send OTP",
-        description: err instanceof Error ? err.message : "Please try again.",
-        variant: "destructive",
-      });
+      const message = err instanceof Error ? err.message : "Please try again.";
+      const isNumberTaken = message.toLowerCase().includes("already linked");
+      if (isNumberTaken) {
+        setNumberTakenError(message);
+      } else {
+        toast({
+          title: "Could not send OTP",
+          description: message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -116,7 +119,7 @@ export default function Onboarding() {
       });
       setStoredStore(created.id, created.ownerToken);
       toast({ title: "Shop created", description: `Welcome, ${formData.name}!` });
-      setLocation("/dashboard");
+      history.push("/dashboard");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Could not create store.";
       toast({ title: "Error", description: msg, variant: "destructive" });
@@ -128,8 +131,7 @@ export default function Onboarding() {
   const totalSteps = 4;
 
   return (
-    <Layout variant="none">
-      <div className="min-h-screen bg-background p-6 flex flex-col items-center justify-center max-w-md mx-auto">
+    <div className="min-h-screen bg-background p-6 flex flex-col items-center justify-center max-w-md mx-auto">
         <div className="w-full space-y-6">
           <div className="space-y-2 text-center">
             <h1 className="text-2xl font-bold font-serif text-secondary">Let's set up your shop</h1>
@@ -146,40 +148,49 @@ export default function Onboarding() {
                 onSubmit={handleSendOtp}
                 className="space-y-4"
               >
-                <div className="space-y-2">
-                  <Label htmlFor="name">Shop Name</Label>
-                  <Input
-                    id="name"
+                <IonItem lines="none" className="ion-margin-bottom">
+                  <IonLabel position="stacked">Shop Name</IonLabel>
+                  <IonInput
                     placeholder="e.g. Joy Guru Textiles"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="text-lg py-6"
+                    onIonInput={(e) => setFormData({ ...formData, name: e.detail.value ?? "" })}
+                    className="text-lg"
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="whatsapp">WhatsApp Number</Label>
-                  <div className="flex">
+                </IonItem>
+                <IonItem lines="none" className="ion-margin-bottom">
+                  <IonLabel position="stacked">WhatsApp Number</IonLabel>
+                  <div className="flex w-full">
                     <span className="flex items-center justify-center px-3 border border-r-0 rounded-l-md bg-muted text-muted-foreground">+91</span>
-                    <Input
-                      id="whatsapp"
+                    <IonInput
                       placeholder="9876543210"
                       type="tel"
                       value={formData.whatsapp}
-                      onChange={(e) =>
-                        setFormData({ ...formData, whatsapp: e.target.value.replace(/\D/g, "").slice(0, 10) })
-                      }
-                      className="rounded-l-none py-6"
+                      onIonInput={(e) => {
+                        setNumberTakenError(null);
+                        setFormData({ ...formData, whatsapp: (e.detail.value ?? "").replace(/\D/g, "").slice(0, 10) });
+                      }}
+                      className="flex-1"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">We'll send an OTP to verify this number.</p>
-                </div>
-                <Button
+                </IonItem>
+                <p className="text-xs text-muted-foreground ion-margin-bottom">We'll send an OTP to verify this number.</p>
+                {numberTakenError && (
+                  <div className="ion-margin-bottom p-3 rounded-lg bg-danger/10 border border-danger/30 text-sm text-danger">
+                    <p className="font-medium">{numberTakenError}</p>
+                    <Link to="/login" className="mt-2 inline-block font-medium underline">
+                      Log in to your shop →
+                    </Link>
+                  </div>
+                )}
+                <IonButton
                   type="submit"
-                  className="w-full py-6 text-lg mt-4 bg-secondary hover:bg-secondary/90"
+                  expand="block"
+                  size="large"
+                  color="secondary"
                   disabled={loading || !formData.name.trim() || formData.whatsapp.replace(/\D/g, "").length < 10}
                 >
                   {loading ? "Sending…" : "Send OTP"}
-                </Button>
+                </IonButton>
               </motion.form>
             )}
 
@@ -192,38 +203,33 @@ export default function Onboarding() {
                 onSubmit={handleVerifyOtp}
                 className="space-y-4"
               >
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground ion-margin-bottom">
                   Code sent to +91 {formData.whatsapp.replace(/\D/g, "").slice(-10)}
                 </p>
-                <div className="space-y-2">
-                  <Label htmlFor="otp">Verification code</Label>
-                  <Input
-                    id="otp"
+                <IonItem lines="none" className="ion-margin-bottom">
+                  <IonLabel position="stacked">Verification code</IonLabel>
+                  <IonInput
                     type="text"
-                    inputMode="numeric"
+                    inputmode="numeric"
                     placeholder="000000"
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    onIonInput={(e) => setOtp((e.detail.value ?? "").replace(/\D/g, "").slice(0, 6))}
+                    maxlength={6}
                     className="text-center text-lg tracking-[0.5em]"
-                    maxLength={6}
                   />
-                </div>
-                <Button
+                </IonItem>
+                <IonButton
                   type="submit"
-                  className="w-full py-6 text-lg bg-secondary hover:bg-secondary/90"
+                  expand="block"
+                  size="large"
+                  color="secondary"
                   disabled={loading || otp.replace(/\D/g, "").length < 4}
                 >
                   {loading ? "Verifying…" : "Verify"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => setStep(1)}
-                  disabled={loading}
-                >
+                </IonButton>
+                <IonButton fill="clear" expand="block" onClick={() => setStep(1)} disabled={loading}>
                   Change number
-                </Button>
+                </IonButton>
               </motion.form>
             )}
 
@@ -235,51 +241,53 @@ export default function Onboarding() {
                 exit={{ x: -20, opacity: 0 }}
                 className="space-y-4"
               >
-                <Label>Choose Business Type</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <IonLabel className="ion-margin-bottom block">Choose Business Type</IonLabel>
+                <div className="grid grid-cols-2 gap-3 ion-margin-bottom">
                   {businessTypes.map((type) => (
-                    <Card
+                    <IonCard
                       key={type.id}
+                      button
                       onClick={() => setFormData({ ...formData, type: type.id })}
-                      className={`p-4 cursor-pointer transition-all border-2 flex flex-col items-center gap-2 text-center hover:shadow-md ${
-                        formData.type === type.id ? "border-primary bg-primary/5" : "border-transparent"
-                      }`}
+                      className={`p-4 cursor-pointer flex flex-col items-center gap-2 text-center ${formData.type === type.id ? "border-2 border-primary" : ""}`}
                     >
-                      <div className={`p-3 rounded-full ${type.color}`}>
-                        <type.icon className="w-6 h-6" />
-                      </div>
-                      <span className="font-medium text-sm">{type.label}</span>
-                    </Card>
+                      <IonCardContent className="flex flex-col items-center gap-2">
+                        <div className={`p-3 rounded-full ${type.color}`}>
+                          <type.icon className="w-6 h-6" />
+                        </div>
+                        <span className="font-medium text-sm">{type.label}</span>
+                      </IonCardContent>
+                    </IonCard>
                   ))}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="mpin">Set your 6-digit MPIN (for login)</Label>
-                  <Input
-                    id="mpin"
+                <IonItem lines="none" className="ion-margin-bottom">
+                  <IonLabel position="stacked">Set your 6-digit MPIN (for login)</IonLabel>
+                  <IonInput
                     type="password"
-                    inputMode="numeric"
+                    inputmode="numeric"
                     placeholder="••••••"
                     value={formData.mpin}
-                    onChange={(e) =>
-                      setFormData({ ...formData, mpin: e.target.value.replace(/\D/g, "").slice(0, 6) })
+                    onIonInput={(e) =>
+                      setFormData({ ...formData, mpin: (e.detail.value ?? "").replace(/\D/g, "").slice(0, 6) })
                     }
+                    maxlength={6}
                     className="text-center text-lg tracking-[0.5em]"
-                    maxLength={6}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    You'll use this MPIN to log in next time. Don't share it.
-                  </p>
-                </div>
-                <Button
-                  className="w-full py-6 text-lg mt-6 bg-primary text-primary-foreground hover:bg-primary/90"
+                </IonItem>
+                <p className="text-xs text-muted-foreground ion-margin-bottom">
+                  You'll use this MPIN to log in next time. Don't share it.
+                </p>
+                <IonButton
+                  expand="block"
+                  size="large"
+                  className="ion-margin-bottom"
                   onClick={() => setStep(4)}
                   disabled={formData.mpin.replace(/\D/g, "").length !== 6}
                 >
                   Next: Design your store
-                </Button>
-                <Button variant="ghost" className="w-full" onClick={() => setStep(2)}>
+                </IonButton>
+                <IonButton fill="clear" expand="block" onClick={() => setStep(2)}>
                   Back
-                </Button>
+                </IonButton>
               </motion.div>
             )}
 
@@ -314,15 +322,14 @@ export default function Onboarding() {
                   />
                 )}
                 {designView === "picker" && (
-                  <Button variant="ghost" className="w-full" onClick={() => setStep(3)}>
+                  <IonButton fill="clear" expand="block" onClick={() => setStep(3)}>
                     Back
-                  </Button>
+                  </IonButton>
                 )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
-    </Layout>
   );
 }

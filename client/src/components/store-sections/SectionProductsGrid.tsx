@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { IonButton, IonCard, IonCardContent, IonBadge } from "@ionic/react";
 import { IndianRupee, Phone } from "lucide-react";
 import type { Product } from "@/lib/api";
 import type { ProductsGridProps } from "@shared/schema";
@@ -31,7 +29,7 @@ export function SectionProductsGrid({ products, storeName, whatsapp, data }: Pro
       <h2 className="text-xl font-semibold text-secondary mb-4">Products</h2>
       <div className={`grid ${gridClass} gap-4`}>
         {products.map((product) => (
-          <Card key={product.id} className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow">
+          <IonCard key={product.id} className="overflow-hidden">
             <div className="aspect-[3/4] relative bg-gray-200">
               <img
                 src={product.image}
@@ -39,23 +37,25 @@ export function SectionProductsGrid({ products, storeName, whatsapp, data }: Pro
                 className="w-full h-full object-cover"
               />
               {showPrices && (
-                <Badge className="absolute top-2 left-2 bg-white/90 text-black hover:bg-white shadow-sm backdrop-blur-sm">
-                  <IndianRupee className="w-3 h-3 mr-0.5" /> {product.price}
-                </Badge>
+                <IonBadge className="absolute top-2 left-2 bg-white/90 text-black">
+                  <IndianRupee className="w-3 h-3 mr-0.5 inline" /> {product.price}
+                </IonBadge>
               )}
             </div>
-            <div className="p-3">
+            <IonCardContent className="p-3">
               <h3 className="font-medium text-sm line-clamp-2 leading-snug min-h-[2.5em] text-gray-800">
                 {product.name}
               </h3>
-              <Button
-                className="w-full mt-3 bg-[#25D366] hover:bg-[#128C7E] text-white h-8 text-xs font-bold shadow-sm"
+              <IonButton
+                expand="block"
+                size="small"
+                className="mt-3 bg-[#25D366] text-white text-xs font-bold"
                 onClick={() => handleOrder(product)}
               >
                 <Phone className="w-3 h-3 mr-1.5" /> Order
-              </Button>
-            </div>
-          </Card>
+              </IonButton>
+            </IonCardContent>
+          </IonCard>
         ))}
       </div>
       {products.length === 0 && (

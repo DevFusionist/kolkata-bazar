@@ -1,16 +1,19 @@
 import type { SectionType } from "@shared/schema";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButton,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonSelect,
+  IonSelectOption,
+  IonTextarea,
+  IonCheckbox,
+} from "@ionic/react";
 import type { StoreSection } from "@shared/schema";
 
 type Props = {
@@ -37,155 +40,147 @@ export function SectionPropsEditor({ section, open, onOpenChange, onSave }: Prop
   const title = SECTION_LABELS[section.type];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Edit {title}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
+    <IonModal isOpen={open} onDidDismiss={() => onOpenChange(false)}>
+      <IonHeader>
+        <IonToolbar className="ion-padding-start ion-padding-end">
+          <IonTitle>Edit {title}</IonTitle>
+          <IonButton slot="end" fill="clear" onClick={() => onOpenChange(false)}>
+            Done
+          </IonButton>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent className="ion-padding">
+        <div className="space-y-4 py-4 px-4">
           {section.type === "hero" && (
             <>
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input
+              <IonItem lines="none">
+                <IonLabel position="stacked">Title</IonLabel>
+                <IonInput
                   value={(props.title as string) ?? ""}
-                  onChange={(e) => setProp("title", e.target.value)}
+                  onIonInput={(e) => setProp("title", e.detail.value ?? "")}
                   placeholder="Welcome to our store"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Subtitle</Label>
-                <Input
+              </IonItem>
+              <IonItem lines="none">
+                <IonLabel position="stacked">Subtitle</IonLabel>
+                <IonInput
                   value={(props.subtitle as string) ?? ""}
-                  onChange={(e) => setProp("subtitle", e.target.value)}
+                  onIonInput={(e) => setProp("subtitle", e.detail.value ?? "")}
                   placeholder="Your trusted local store"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Button text</Label>
-                <Input
+              </IonItem>
+              <IonItem lines="none">
+                <IonLabel position="stacked">Button text</IonLabel>
+                <IonInput
                   value={(props.ctaText as string) ?? ""}
-                  onChange={(e) => setProp("ctaText", e.target.value)}
+                  onIonInput={(e) => setProp("ctaText", e.detail.value ?? "")}
                   placeholder="Shop Now"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Hero image URL (optional)</Label>
-                <Input
+              </IonItem>
+              <IonItem lines="none">
+                <IonLabel position="stacked">Hero image URL (optional)</IonLabel>
+                <IonInput
                   value={(props.image as string) ?? ""}
-                  onChange={(e) => setProp("image", e.target.value)}
+                  onIonInput={(e) => setProp("image", e.detail.value ?? "")}
                   placeholder="https://..."
                 />
-              </div>
+              </IonItem>
             </>
           )}
           {section.type === "products_grid" && (
             <>
-              <div className="space-y-2">
-                <Label>Columns</Label>
-                <Select
+              <IonItem lines="none">
+                <IonLabel position="stacked">Columns</IonLabel>
+                <IonSelect
                   value={String(props.columns ?? 2)}
-                  onValueChange={(v) => setProp("columns", Number(v))}
+                  onIonChange={(e) => setProp("columns", Number(e.detail.value))}
+                  placeholder="Select"
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2">2 columns</SelectItem>
-                    <SelectItem value="3">3 columns</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="showPrices"
+                  <IonSelectOption value="2">2 columns</IonSelectOption>
+                  <IonSelectOption value="3">3 columns</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+              <IonItem lines="none">
+                <IonCheckbox
                   checked={props.showPrices !== false}
-                  onChange={(e) => setProp("showPrices", e.target.checked)}
+                  onIonChange={(e) => setProp("showPrices", e.detail.checked)}
                 />
-                <Label htmlFor="showPrices">Show prices on cards</Label>
-              </div>
+                <IonLabel>Show prices on cards</IonLabel>
+              </IonItem>
             </>
           )}
           {section.type === "cta" && (
             <>
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input
+              <IonItem lines="none">
+                <IonLabel position="stacked">Title</IonLabel>
+                <IonInput
                   value={(props.title as string) ?? ""}
-                  onChange={(e) => setProp("title", e.target.value)}
+                  onIonInput={(e) => setProp("title", e.detail.value ?? "")}
                   placeholder="Have questions?"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Button text</Label>
-                <Input
+              </IonItem>
+              <IonItem lines="none">
+                <IonLabel position="stacked">Button text</IonLabel>
+                <IonInput
                   value={(props.buttonText as string) ?? ""}
-                  onChange={(e) => setProp("buttonText", e.target.value)}
+                  onIonInput={(e) => setProp("buttonText", e.detail.value ?? "")}
                   placeholder="Chat on WhatsApp"
                 />
-              </div>
+              </IonItem>
             </>
           )}
           {section.type === "text" && (
             <>
-              <div className="space-y-2">
-                <Label>Content</Label>
-                <Textarea
+              <IonItem lines="none">
+                <IonLabel position="stacked">Content</IonLabel>
+                <IonTextarea
                   value={(props.content as string) ?? ""}
-                  onChange={(e) => setProp("content", e.target.value)}
+                  onIonInput={(e) => setProp("content", e.detail.value ?? "")}
                   placeholder="Your text here..."
                   rows={3}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Alignment</Label>
-                <Select
+              </IonItem>
+              <IonItem lines="none">
+                <IonLabel position="stacked">Alignment</IonLabel>
+                <IonSelect
                   value={(props.align as string) ?? "center"}
-                  onValueChange={(v) => setProp("align", v)}
+                  onIonChange={(e) => setProp("align", e.detail.value)}
+                  placeholder="Select"
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="left">Left</SelectItem>
-                    <SelectItem value="center">Center</SelectItem>
-                    <SelectItem value="right">Right</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <IonSelectOption value="left">Left</IonSelectOption>
+                  <IonSelectOption value="center">Center</IonSelectOption>
+                  <IonSelectOption value="right">Right</IonSelectOption>
+                </IonSelect>
+              </IonItem>
             </>
           )}
           {section.type === "banner" && (
             <>
-              <div className="space-y-2">
-                <Label>Image URL</Label>
-                <Input
+              <IonItem lines="none">
+                <IonLabel position="stacked">Image URL</IonLabel>
+                <IonInput
                   value={(props.image as string) ?? ""}
-                  onChange={(e) => setProp("image", e.target.value)}
+                  onIonInput={(e) => setProp("image", e.detail.value ?? "")}
                   placeholder="https://..."
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Link (optional)</Label>
-                <Input
+              </IonItem>
+              <IonItem lines="none">
+                <IonLabel position="stacked">Link (optional)</IonLabel>
+                <IonInput
                   value={(props.link as string) ?? ""}
-                  onChange={(e) => setProp("link", e.target.value)}
+                  onIonInput={(e) => setProp("link", e.detail.value ?? "")}
                   placeholder="https://..."
                 />
-              </div>
+              </IonItem>
             </>
           )}
           {section.type === "features" && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground ion-padding">
               Feature items can be edited in a future update. For now this section uses default layout.
             </p>
           )}
         </div>
-        <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>Done</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </IonContent>
+    </IonModal>
   );
 }

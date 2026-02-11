@@ -1,19 +1,15 @@
-import { useRoute } from "wouter";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
 import { api, type Product as ApiProduct } from "@/lib/api";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { IonButton, IonBadge, IonCard, IonCardContent, IonInput } from "@ionic/react";
 import { Layout } from "@/components/Layout";
 import { StorePageRenderer } from "@/components/StorePageRenderer";
 import { IndianRupee, ShoppingBag, Phone, Search, Filter } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 
 export default function Store() {
-  const [, params] = useRoute("/store/:id");
-  const whatsappId = params?.id ?? "";
+  const { id: whatsappId = "" } = useParams<{ id: string }>();
   const localStore = useStore();
 
   const { data: apiStore, isLoading, isError } = useQuery({
@@ -61,7 +57,6 @@ export default function Store() {
     );
   }
 
-  // Section-based store (template or custom builder)
   if (store.pageConfig?.sections?.length) {
     return (
       <Layout variant="minimal">
@@ -75,7 +70,6 @@ export default function Store() {
     );
   }
 
-  // Legacy single-layout store
   return (
     <Layout variant="minimal">
       <div className="min-h-screen bg-gray-50 pb-20">
@@ -89,16 +83,16 @@ export default function Store() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button size="icon" variant="ghost" className="rounded-full">
+              <IonButton fill="clear" size="small" className="rounded-full">
                 <Search className="w-5 h-5 text-gray-500" />
-              </Button>
+              </IonButton>
             </div>
           </div>
           <div className="max-w-md mx-auto px-4 pb-3 flex gap-2">
-            <Input placeholder="Search items..." className="h-9 bg-gray-100 border-none" />
-            <Button size="icon" variant="outline" className="h-9 w-9 shrink-0">
+            <IonInput placeholder="Search items..." className="h-9 bg-gray-100 border-none rounded" />
+            <IonButton fill="outline" size="small" className="h-9 w-9 shrink-0">
               <Filter className="w-4 h-4" />
-            </Button>
+            </IonButton>
           </div>
         </div>
 
@@ -111,29 +105,31 @@ export default function Store() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
               >
-                <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow">
+                <IonCard className="overflow-hidden">
                   <div className="aspect-[3/4] relative bg-gray-200">
                     <img
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />
-                    <Badge className="absolute top-2 left-2 bg-white/90 text-black hover:bg-white shadow-sm backdrop-blur-sm">
-                      <IndianRupee className="w-3 h-3 mr-0.5" /> {product.price}
-                    </Badge>
+                    <IonBadge className="absolute top-2 left-2 bg-white/90 text-black">
+                      <IndianRupee className="w-3 h-3 mr-0.5 inline" /> {product.price}
+                    </IonBadge>
                   </div>
-                  <div className="p-3">
+                  <IonCardContent className="p-3">
                     <h3 className="font-medium text-sm line-clamp-2 leading-snug min-h-[2.5em] text-gray-800">
                       {product.name}
                     </h3>
-                    <Button
-                      className="w-full mt-3 bg-[#25D366] hover:bg-[#128C7E] text-white h-8 text-xs font-bold shadow-sm"
+                    <IonButton
+                      expand="block"
+                      size="small"
+                      className="mt-3 bg-[#25D366] text-white text-xs font-bold"
                       onClick={() => handleOrder(product)}
                     >
                       <Phone className="w-3 h-3 mr-1.5" /> Order
-                    </Button>
-                  </div>
-                </Card>
+                    </IonButton>
+                  </IonCardContent>
+                </IonCard>
               </motion.div>
             ))}
           </div>
@@ -147,8 +143,9 @@ export default function Store() {
         </main>
 
         <div className="fixed bottom-4 left-0 right-0 max-w-md mx-auto px-4 flex justify-center pointer-events-none">
-          <Button
-            className="rounded-full shadow-lg bg-secondary text-white pointer-events-auto px-6 font-medium animate-in slide-in-from-bottom-5"
+          <IonButton
+            className="rounded-full shadow-lg pointer-events-auto px-6 font-medium"
+            color="secondary"
             onClick={() => {
               const num = store.whatsapp.replace(/\D/g, "").replace(/^0/, "");
               const wa = num.startsWith("91") ? num : `91${num}`;
@@ -156,7 +153,7 @@ export default function Store() {
             }}
           >
             Chat with Seller
-          </Button>
+          </IonButton>
         </div>
       </div>
     </Layout>

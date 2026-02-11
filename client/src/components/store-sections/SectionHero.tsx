@@ -1,3 +1,4 @@
+import { IonButton } from "@ionic/react";
 import type { HeroProps } from "@shared/schema";
 
 type Props = { storeName: string; whatsapp: string; data?: HeroProps | Record<string, unknown> };
@@ -23,13 +24,15 @@ export function SectionHero({ storeName, whatsapp, data }: Props) {
       <div className="relative max-w-md mx-auto px-6 py-16 text-center">
         <h1 className="text-3xl font-bold font-serif drop-shadow-md">{title}</h1>
         <p className="mt-2 text-white/90 text-lg">{subtitle}</p>
-        <button
-          type="button"
+        <IonButton
+          fill="solid"
+          color="light"
+          shape="round"
+          className="mt-6 font-semibold"
           onClick={openWhatsApp}
-          className="mt-6 inline-flex items-center justify-center rounded-full bg-white text-secondary px-6 py-3 font-semibold shadow-lg hover:bg-white/95 transition-colors"
         >
           {ctaText}
-        </button>
+        </IonButton>
       </div>
     </section>
   );

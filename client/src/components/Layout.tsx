@@ -1,6 +1,15 @@
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useHistory } from "react-router-dom";
 import { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonContent,
+  IonTabBar,
+  IonTabButton,
+  IonButtons,
+} from "@ionic/react";
+import { IonButton } from "@ionic/react";
 import { Menu, X, Store, HelpCircle, LogIn, LayoutDashboard, LogOut } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -16,7 +25,9 @@ type LayoutProps = {
 };
 
 export function Layout({ children, variant = "default", showSellerNav = false }: LayoutProps) {
-  const [location] = useLocation();
+  const location = useLocation();
+  const history = useHistory();
+  const pathname = location.pathname;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (variant === "none") {
@@ -40,94 +51,82 @@ export function Layout({ children, variant = "default", showSellerNav = false }:
         : [{ href: "/login", label: "Log in", icon: LogIn }]),
   ];
 
+  const handleLogout = () => {
+    setMobileMenuOpen(false);
+    logout().catch(() => {});
+    clearStoredStore();
+    history.push("/");
+  };
+
   return (
-    <div className="min-h-screen bg-background flex flex-col w-full max-w-full overflow-hidden relative">
-      <header
+    <IonPage className="ion-page">
+      <IonHeader
         className={cn(
-          "sticky top-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80",
+          "ion-no-border border-b bg-white/95 backdrop-blur",
           isMinimal && "py-2"
         )}
       >
-        <div className="w-full px-4 flex justify-between items-center h-14">
-          <Link href="/" className="font-bold text-lg text-secondary font-serif hover:opacity-90">
-            Amar Dokan
-          </Link>
+        <IonToolbar className="px-4">
+          <IonButtons slot="start">
+            <Link to="/" className="font-bold text-lg text-secondary font-serif hover:opacity-90 flex items-center px-3">
+              Amar Dokan
+            </Link>
+          </IonButtons>
+          {/* Only show hamburger when logged in — tab bar has no "Log out"; menu is for logout only */}
+          {!isMinimal && isLoggedIn && (
+            <IonButtons slot="end">
+              <button
+                type="button"
+                className="ion-button ion-button-clear p-2"
+                onClick={() => setMobileMenuOpen((o) => !o)}
+                aria-label="Account menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </IonButtons>
+          )}
+        </IonToolbar>
 
-          {/* Mobile menu trigger */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileMenuOpen((o) => !o)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
-        </div>
-
-        {/* Mobile nav */}
-        {mobileMenuOpen && (
+        {mobileMenuOpen && isLoggedIn && (
           <div className="absolute top-14 left-0 right-0 border-t bg-white px-4 py-3 flex flex-col gap-1 shadow-lg z-50">
-            {navLinks.map((link) => {
-              const { href, label, icon: Icon, isLogout } = link as typeof link & { isLogout?: boolean };
-              if (isLogout) {
-                return (
-                  <Button
-                    key="logout"
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      logout().catch(() => {});
-                      clearStoredStore();
-                      window.location.href = "/";
-                    }}
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {label}
-                  </Button>
-                );
-              }
-              return (
-                <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)}>
-                  <Button
-                    variant={location === href ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {label}
-                  </Button>
-                </Link>
-              );
-            })}
+            <IonButton fill="clear" expand="block" className="justify-start" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Log out
+            </IonButton>
           </div>
         )}
-      </header>
+      </IonHeader>
 
-      <main className="flex-1 flex flex-col overflow-y-auto pb-20">{children}</main>
+      <IonContent className="ion-content flex flex-col overflow-y-auto">
+        <div className="flex-1 flex flex-col pb-24">{children}</div>
 
-      {/* Bottom Navigation for Mobile Feel */}
-      <nav className="fixed bottom-0 left-0 right-0 w-full border-t bg-white/95 backdrop-blur h-16 flex items-center justify-around px-2 z-40">
-        {navLinks.filter(l => !l.isLogout).slice(0, 4).map((link) => {
-          const { href, label, icon: Icon } = link;
-          return (
-            <Link key={href} href={href} className="flex flex-col items-center gap-1">
-              <div className={cn(
-                "p-2 rounded-xl transition-colors",
-                location === href ? "bg-primary/20 text-primary" : "text-muted-foreground"
-              )}>
-                <Icon className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] font-medium">{label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+        {!isMinimal && (
+          <footer className="p-5 text-center text-[10px] text-muted-foreground bg-muted/30 border-t shrink-0">
+            <p className="text-lg">Made with ❤️ in Kolkata</p>
+          </footer>
+        )}
+      </IonContent>
 
+      {/* Bottom tab bar – use history.push so React Router handles navigation */}
       {!isMinimal && (
-        <footer className="py-4 text-center text-[10px] text-muted-foreground bg-muted/30 border-t mb-16">
-          <p>Made with ❤️ in Kolkata</p>
-        </footer>
+        <IonTabBar slot="bottom" className="ion-tab-bar border-t bg-white/95 backdrop-blur safe-area-bottom">
+          {navLinks.filter((l) => !(l as { isLogout?: boolean }).isLogout).slice(0, 4).map((link) => {
+            const { href, label, icon: Icon } = link;
+            const isActive = pathname === href;
+            return (
+              <IonTabButton
+                key={href}
+                tab={label}
+                onClick={() => history.push(href)}
+                className={cn(isActive && "ion-tab-selected")}
+              >
+                <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-muted-foreground")} />
+                <span className={cn("text-[10px] font-medium block mt-0.5", isActive ? "text-primary" : "text-muted-foreground")}>{label}</span>
+              </IonTabButton>
+            );
+          })}
+        </IonTabBar>
       )}
-    </div>
+    </IonPage>
   );
 }

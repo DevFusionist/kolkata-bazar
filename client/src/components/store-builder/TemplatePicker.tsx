@@ -1,5 +1,4 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { IonCard, IonCardContent, IonButton } from "@ionic/react";
 import { LayoutTemplate, Sparkles } from "lucide-react";
 import { STORE_TEMPLATES } from "@shared/templates";
 import type { PageConfig } from "@shared/schema";
@@ -29,41 +28,47 @@ export function TemplatePicker({ onSelectTemplate, onBuildFromScratch }: Props) 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {STORE_TEMPLATES.map((t) => (
-          <Card
+          <IonCard
             key={t.id}
-            className="p-4 flex flex-col border-2 hover:border-primary/50 transition-colors cursor-pointer group"
+            button
             onClick={() => onSelectTemplate(t.id, t.pageConfig)}
+            className="p-4 flex flex-col cursor-pointer"
           >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                <LayoutTemplate className="w-5 h-5" />
+            <IonCardContent className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <LayoutTemplate className="w-5 h-5" />
+                </div>
+                <span className="font-semibold">{t.name}</span>
               </div>
-              <span className="font-semibold">{t.name}</span>
-            </div>
-            <p className="text-sm text-muted-foreground flex-1">{t.description}</p>
-            <Button variant="secondary" size="sm" className="mt-3 w-full group-hover:bg-primary group-hover:text-primary-foreground">
-              Use & customize
-            </Button>
-          </Card>
+              <p className="text-sm text-muted-foreground flex-1">{t.description}</p>
+              <IonButton color="secondary" size="small" expand="block">
+                Use & customize
+              </IonButton>
+            </IonCardContent>
+          </IonCard>
         ))}
       </div>
 
       <div className="pt-4 border-t">
-        <Card
-          className="p-4 flex flex-col items-center text-center border-2 border-dashed hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer"
+        <IonCard
+          button
           onClick={() => onBuildFromScratch(BLANK_CONFIG)}
+          className="p-4 flex flex-col items-center text-center border-2 border-dashed cursor-pointer"
         >
-          <div className="p-3 rounded-full bg-muted text-muted-foreground mb-2">
-            <Sparkles className="w-8 h-8" />
-          </div>
-          <span className="font-semibold">Build from scratch</span>
-          <p className="text-sm text-muted-foreground mt-1">
-            Drag and drop sections to create your perfect store layout.
-          </p>
-          <Button variant="outline" size="sm" className="mt-3">
-            Start building
-          </Button>
-        </Card>
+          <IonCardContent className="flex flex-col items-center gap-2">
+            <div className="p-3 rounded-full bg-muted text-muted-foreground mb-2">
+              <Sparkles className="w-8 h-8" />
+            </div>
+            <span className="font-semibold">Build from scratch</span>
+            <p className="text-sm text-muted-foreground mt-1">
+              Drag and drop sections to create your perfect store layout.
+            </p>
+            <IonButton fill="outline" size="small" className="mt-3">
+              Start building
+            </IonButton>
+          </IonCardContent>
+        </IonCard>
       </div>
     </div>
   );
