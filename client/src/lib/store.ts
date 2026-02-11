@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export type Product = {
   id: string;
@@ -39,15 +39,9 @@ const DEFAULT_STORE: StoreData = {
   ]
 };
 
+// In-memory only: form state for onboarding and fallback for dashboard/store while API loads. Not persisted.
 export function useStore() {
-  const [store, setStore] = useState<StoreData>(() => {
-    const saved = localStorage.getItem('amar_dokan_store');
-    return saved ? JSON.parse(saved) : DEFAULT_STORE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('amar_dokan_store', JSON.stringify(store));
-  }, [store]);
+  const [store, setStore] = useState<StoreData>(DEFAULT_STORE);
 
   const updateStore = (data: Partial<StoreData>) => {
     setStore(prev => ({ ...prev, ...data }));

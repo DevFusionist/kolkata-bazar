@@ -18,9 +18,9 @@ export function metaImagesPlugin(): Plugin {
 
       // Check if opengraph image exists in public directory
       const publicDir = path.resolve(process.cwd(), 'client', 'public');
-      const opengraphPngPath = path.join(publicDir, 'opengraph.png');
-      const opengraphJpgPath = path.join(publicDir, 'opengraph.jpg');
-      const opengraphJpegPath = path.join(publicDir, 'opengraph.jpeg');
+      const opengraphPngPath = path.join(publicDir, 'opengraph_desktop.png');
+      const opengraphJpgPath = path.join(publicDir, 'opengraph_desktop.jpg');
+      const opengraphJpegPath = path.join(publicDir, 'opengraph_desktop.jpeg');
 
       let imageExt: string | null = null;
       if (fs.existsSync(opengraphPngPath)) {
@@ -36,7 +36,7 @@ export function metaImagesPlugin(): Plugin {
         return html;
       }
 
-      const imageUrl = `${baseUrl}/opengraph.${imageExt}`;
+      const imageUrl = `${baseUrl}/opengraph_desktop.${imageExt}`;
 
       log('[meta-images] updating meta image tags to:', imageUrl);
 

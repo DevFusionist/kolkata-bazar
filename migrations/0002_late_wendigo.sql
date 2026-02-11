@@ -1,0 +1,1 @@
+ALTER TABLE "store_owners" ALTER COLUMN "mpin_hash" SET DATA TYPE varchar(256);
