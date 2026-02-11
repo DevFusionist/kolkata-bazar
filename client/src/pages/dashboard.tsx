@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Share2, ExternalLink, Trash2, IndianRupee, Palette } from "lucide-react";
+import { Plus, Share2, ExternalLink, Trash2, IndianRupee, Palette, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -144,16 +144,26 @@ export default function Dashboard() {
   return (
     <Layout showSellerNav>
       <div className="min-h-screen bg-background pb-20">
-        <header className="bg-secondary text-white p-6 shadow-md">
-          <div className="flex justify-between items-start max-w-md mx-auto">
-            <div>
-              <h1 className="font-bold text-xl">{displayStore.name}</h1>
+        <header className="bg-secondary text-white p-4 sm:p-6 shadow-md">
+          <div className="flex items-center gap-3 w-full">
+            <Link href="/">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="shrink-0 text-white hover:bg-white/20 rounded-full h-9 w-9"
+                aria-label="Back to home"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <div className="flex-1 min-w-0">
+              <h1 className="font-bold text-xl truncate">{displayStore.name}</h1>
               <p className="text-white/80 text-sm flex items-center gap-1">
                 Admin Panel{" "}
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse ml-1"></span>
               </p>
             </div>
-            <Link href={`/store/${displayStore.whatsapp}`}>
+            <Link href={`/store/${displayStore.whatsapp}`} className="shrink-0">
               <Button
                 size="icon"
                 variant="secondary"
@@ -165,7 +175,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="max-w-md mx-auto p-4 space-y-6">
+        <main className="w-full p-4 sm:p-6 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <Link href="/dashboard/design">
               <Button className="h-auto py-4 w-full flex flex-col gap-2 bg-white text-foreground border shadow-sm hover:bg-gray-50">

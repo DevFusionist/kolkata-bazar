@@ -41,7 +41,7 @@ export function Layout({ children, variant = "default", showSellerNav = false }:
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col max-w-[430px] mx-auto shadow-2xl border-x overflow-hidden relative">
+    <div className="min-h-screen bg-background flex flex-col w-full max-w-full overflow-hidden relative">
       <header
         className={cn(
           "sticky top-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80",
@@ -106,7 +106,7 @@ export function Layout({ children, variant = "default", showSellerNav = false }:
       <main className="flex-1 flex flex-col overflow-y-auto pb-20">{children}</main>
 
       {/* Bottom Navigation for Mobile Feel */}
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] border-t bg-white/95 backdrop-blur h-16 flex items-center justify-around px-2 z-40">
+      <nav className="fixed bottom-0 left-0 right-0 w-full border-t bg-white/95 backdrop-blur h-16 flex items-center justify-around px-2 z-40">
         {navLinks.filter(l => !l.isLogout).slice(0, 4).map((link) => {
           const { href, label, icon: Icon } = link;
           return (
